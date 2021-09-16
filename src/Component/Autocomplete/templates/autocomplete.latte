@@ -1,0 +1,11 @@
+<div class="results">
+	{if $count}
+		<div n:foreach="$items as $item" class="autocomplete-item" role="option" data-autocomplete-value="{$item->id}">
+			{$item->caption}
+		</div>
+		<div class="autocomplete-footer">{$count} of {$itemCount} results</div>
+	{else}
+		<div class="autocomplete-no-results">No results</div>
+	{/if}
+</div>
+
