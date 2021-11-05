@@ -13,12 +13,12 @@ final class AttributesBuilder
 
 	public function addControllerAttribute(string $controller): void
 	{
-		$this->appendDataAttribute('controller', $this->componentName($controller));
+		$this->appendDataAttribute('controller', self::controllerName($controller));
 	}
 
 	public function addControllerDataAttribute(string $controller, string $name, mixed $value): void
 	{
-		$key = sprintf('%s-%s', $this->componentName($controller), $this->camel2Dashed($name));
+		$key = sprintf('%s-%s', self::controllerName($controller), self::camel2Dashed($name));
 
 		$this->addDataAttribute($key, $value);
 	}
@@ -45,19 +45,19 @@ final class AttributesBuilder
 		return '"' . htmlspecialchars($string, ENT_QUOTES) . '"';
 	}
 
-	public function camel2Dashed(string $string): string
+	public static function camel2Dashed(string $string): string
 	{
 		return strtolower(preg_replace('#([a-zA-Z])(?=[A-Z])#', '$1-', Strings::firstLower($string)));
 	}
 
-	public function namespace2Dashed(string $string): string
+	public static function namespace2Dashed(string $string): string
 	{
 		return strtr($string, ['/' => '--']);
 	}
 
-	public function componentName(string $string): string
+	public static function controllerName(string $string): string
 	{
-		return $this->namespace2Dashed($this->camel2Dashed($string));
+		return self::namespace2Dashed(self::camel2Dashed($string));
 	}
 
 	private function convertToString(mixed $value): string

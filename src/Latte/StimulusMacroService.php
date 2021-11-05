@@ -3,7 +3,9 @@
 namespace WebChemistry\Stimulus\Latte;
 
 use LogicException;
+use Nette\Utils\Arrays;
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
+use WebChemistry\Stimulus\Parser\ActionAttributeParser;
 
 final class StimulusMacroService
 {
@@ -26,23 +28,44 @@ final class StimulusMacroService
 		return $values;
 	}
 
-	public static function makeTarget(string $target, string $controller): string
+	public static function pushToStack(?array &$stack, array $controllers): void
+	{
+		if ($stack === null) {
+			$stack = [];
+		}
+
+		array_push($stack, array_map(
+			fn (string $controller) => AttributesBuilder::controllerName($controller),
+			array_keys($controllers)
+		));
+	}
+
+	public static function makeTargets(array $controllerStack, array $targets): string
 	{
 		$builder = new AttributesBuilder();
-		$builder->addControllerDataAttribute($controller, 'target', $target);
+		$controller = Arrays::first(Arrays::last($controllerStack));
+
+		$builder->addControllerDataAttribute($controller, 'target', implode(' ', $targets));
 
 		return $builder->toString();
 	}
 
-	public static function makeAction(string $method, string $controller, string $type = ''): string
+	public static function makeActions(array $controllerStack, array $actions): string
 	{
-		$builder = new AttributesBuilder();
+		$last = Arrays::last($controllerStack);
 
-		if ($type) {
-			$type .= '->';
+		$builder = new AttributesBuilder();
+		$attribute = [];
+		foreach ($actions as $action => $params) {
+			$result = ActionAttributeParser::parse($action, $last ?? []);
+			foreach ((array) $params as $name => $value) {
+				$builder->addControllerDataAttribute($result->controller, $name . 'Param', $value);
+			}
+
+			$attribute[] = $result->attribute;
 		}
 
-		$builder->addDataAttribute('action', sprintf('%s%s#%s', $type, $builder->componentName($controller), $method));
+		$builder->addDataAttribute('action', implode(' ', $attribute));
 
 		return $builder->toString();
 	}

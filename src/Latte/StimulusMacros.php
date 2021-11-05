@@ -12,6 +12,9 @@ use LogicException;
 final class StimulusMacros
 {
 
+	private const PRIVATE_VAR = '$this->global->ʟ_controllers';
+	private const LOCAL_VAR = '$ʟ_controllers';
+
 	public function __construct(
 		private string $controllerName = 's',
 		private string $actionName = 's-action',
@@ -25,9 +28,8 @@ final class StimulusMacros
 	{
 		$me = new MacroSet($compiler);
 
-		$me->addMacro($this->controllerName, [$this, 'macroController'], 'array_pop($this->global->stimulusControllerStack);');
+		$me->addMacro($this->controllerName, [$this, 'macroController'], sprintf('array_pop(%s);', self::PRIVATE_VAR));
 		$me->addMacro($this->targetName, null, null, [$this, 'macroTarget']);
-		$me->addMacro($this->targetName . 's', null, null, [$this, 'macroTargets']);
 		$me->addMacro($this->actionName, null, null, [$this, 'macroAction']);
 
 		foreach ($this->templates as $name => $template) {
@@ -39,30 +41,28 @@ final class StimulusMacros
 
 	public function macroTarget(MacroNode $node, PhpWriter $writer): string
 	{
-		return $writer->write(
-			'%node.line ' .
-			sprintf('$_tmp = %s::applyDefaultController(%%node.array, end($this->global->stimulusControllerStack));', StimulusMacroService::class) .
-			sprintf('echo %s::makeTarget(...$_tmp);', StimulusMacroService::class)
-		);
-	}
+		$words = [];
+		while ($node->tokenizer->isNext()) {
+			$words[] = $node->tokenizer->joinUntil(',');
 
-	public function macroTargets(MacroNode $node, PhpWriter $writer): string
-	{
+			$node->tokenizer->nextValue();
+		}
+
+		$words = array_map('trim', $words);
+
 		return $writer->write(
 			'%node.line ' .
-			sprintf('$_tmp = %s::applyDefaultControllerToArray(%%node.array, end($this->global->stimulusControllerStack));', StimulusMacroService::class) .
-			'foreach ($_tmp as $_p) {' . "\n" .
-			sprintf('echo %s::makeTarget(...$_p);', StimulusMacroService::class) . "\n" .
-			'}' . "\n"
+			sprintf('echo %s::makeTargets(%s, %%var);', StimulusMacroService::class, self::PRIVATE_VAR),
+			$words
 		);
 	}
 
 	public function macroAction(MacroNode $node, PhpWriter $writer): string
 	{
 		return $writer->write(
-			'$_tmp = %node.array;' .
-			'$_tmp["controller"] ??= end($this->global->stimulusControllerStack);' .
-			sprintf('echo %s::makeAction(...$_tmp);', StimulusMacroService::class)
+			'%node.line' .
+			sprintf('echo %s::makeActions(%s, %%raw);', StimulusMacroService::class, self::PRIVATE_VAR),
+			$this->formatStringFollowingWithOptionalArray($node, $writer),
 		);
 	}
 
@@ -72,7 +72,26 @@ final class StimulusMacros
 			throw new LogicException('Macro stimulus can be used only as n:stimulus');
 		}
 
-		$controllers = [];
+		$node->attrCode =
+			sprintf('<?php echo %s::makeControllers(%s); ?>', StimulusMacroService::class, self::LOCAL_VAR);
+
+		return $writer->write(
+			'%node.line' .
+			sprintf('%s::pushToStack(%s, %s = %%raw);', StimulusMacroService::class, self::PRIVATE_VAR, self::LOCAL_VAR),
+			$this->formatStringFollowingWithOptionalArray($node, $writer),
+		);
+	}
+
+	private function stimulusTemplate(string $template): callable
+	{
+		return fn (MacroNode $node, PhpWriter $writer): string => $writer->write(
+			sprintf('echo %s::makeControllers(%s);', StimulusMacroService::class, $template)
+		);
+	}
+
+	private function formatStringFollowingWithOptionalArray(MacroNode $node, PhpWriter $writer): string
+	{
+		$arguments = [];
 		$tokenizer = $node->tokenizer;
 		while ($tokenizer->isNext()) {
 			TokenizerUtility::skipWhitespaces($tokenizer);
@@ -81,25 +100,10 @@ final class StimulusMacros
 			TokenizerUtility::skipWhitespaces($tokenizer);
 			$array = TokenizerUtility::formatArray($writer, $tokenizer);
 
-			$controllers[$name] = sprintf('%s => %s', $name, $array ?? 'null');
+			$arguments[$name] = sprintf('%s => %s', $name, $array ?? 'null');
 		}
 
-		$raw = '[' . implode(', ', $controllers) . ']';
-
-		$controller = array_key_first($controllers) ?? 'null';
-		$node->attrCode = $writer->write(
-			sprintf('<?php echo %s::makeControllers(%%raw); ?>', StimulusMacroService::class),
-			$raw
-		);
-
-		return $writer->write('$this->global->stimulusControllerStack[] = %raw;', $controller);
-	}
-
-	private function stimulusTemplate(string $template): callable
-	{
-		return fn (MacroNode $node, PhpWriter $writer): string => $writer->write(
-			sprintf('echo %s::makeControllers(%s);', StimulusMacroService::class, $template)
-		);
+		return '[' . implode(', ', $arguments) . ']';
 	}
 
 }
