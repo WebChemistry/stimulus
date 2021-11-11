@@ -8,6 +8,7 @@ use Latte\Macros\MacroSet;
 use Latte\MacroTokens;
 use Latte\PhpWriter;
 use LogicException;
+use WebChemistry\Stimulus\Html\StimulusHtml;
 
 final class StimulusMacros
 {
@@ -28,6 +29,7 @@ final class StimulusMacros
 	{
 		$me = new MacroSet($compiler);
 
+		$me->addMacro('st', null, null,sprintf('echo %s::renderAttributes(%%node.args);', StimulusMacroService::class));
 		$me->addMacro($this->controllerName, [$this, 'macroController'], sprintf('array_pop(%s);', self::PRIVATE_VAR));
 		$me->addMacro($this->targetName, null, null, [$this, 'macroTarget']);
 		$me->addMacro($this->actionName, null, null, [$this, 'macroAction']);

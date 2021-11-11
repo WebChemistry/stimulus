@@ -5,27 +5,45 @@ namespace WebChemistry\Stimulus\Latte;
 use LogicException;
 use Nette\Utils\Arrays;
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
+use WebChemistry\Stimulus\Html\StimulusHtml;
+use WebChemistry\Stimulus\Object\Action;
+use WebChemistry\Stimulus\Object\Controller;
+use WebChemistry\Stimulus\Object\Target;
 use WebChemistry\Stimulus\Parser\ActionAttributeParser;
 
 final class StimulusMacroService
 {
 
-	public static function applyDefaultControllerToArray(array $values, string $controller): array
+	public static function createController(string $controller, array $values = [], array $classes = []): Controller
 	{
-		foreach ($values as &$value) {
-			$value = self::applyDefaultController($value, $controller);
-		}
-
-		return $values;
+		return new Controller($controller, $values, $classes);
 	}
 
-	public static function applyDefaultController(array $values, string $controller): array
+	public static function createTarget(Controller|string $controller, string $name): Target
 	{
-		if (!isset($values['controller']) || !isset($values[1])) {
-			$values['controller'] = $controller;
+		return new Target((string) $controller, $name);
+	}
+
+	public static function createAction(string $action, Controller|string ... $controllers): Action
+	{
+		return new Action(
+			sprintf($action, ...array_map(fn (Controller|string $controller) => (string) $controller, $controllers))
+		);
+	}
+
+	public static function renderAttributes(Controller|Action|Target ... $attributes): string
+	{
+		$html = new StimulusHtml();
+
+		foreach ($attributes as $attribute) {
+			match (true) {
+				$attribute instanceof Controller => $html->addController($attribute),
+				$attribute instanceof Action => $html->addAction($attribute),
+				$attribute instanceof Target => $html->addTarget($attribute),
+			};
 		}
 
-		return $values;
+		return ' ' . $html->render();
 	}
 
 	public static function pushToStack(?array &$stack, array $controllers): void
@@ -47,7 +65,7 @@ final class StimulusMacroService
 
 		$builder->addControllerDataAttribute($controller, 'target', implode(' ', $targets));
 
-		return $builder->toString();
+		return ' ' . $builder->toString();
 	}
 
 	public static function makeActions(array $controllerStack, array $actions): string
@@ -67,7 +85,7 @@ final class StimulusMacroService
 
 		$builder->addDataAttribute('action', implode(' ', $attribute));
 
-		return $builder->toString();
+		return ' ' . $builder->toString();
 	}
 
 	public static function makeControllers(array $controllers): string
@@ -78,7 +96,7 @@ final class StimulusMacroService
 			self::makeController($builder, $controller, $parameters ?? []);
 		}
 
-		return $builder->toString();
+		return ' ' . $builder->toString();
 	}
 
 	private static function makeController(AttributesBuilder $builder, string $controller, array $arguments): void

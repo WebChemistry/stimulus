@@ -85,7 +85,7 @@ final class AttributesBuilder
 			$html .= sprintf(' %s=%s', $attribute, $this->attributeValue($value));
 		}
 
-		return $html;
+		return ltrim($html);
 	}
 
 }

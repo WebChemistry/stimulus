@@ -9,6 +9,7 @@ use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use stdClass;
 use WebChemistry\Stimulus\Latte\StimulusMacros;
+use WebChemistry\Stimulus\Latte\StimulusMacroService;
 
 final class StimulusExtension extends CompilerExtension
 {
@@ -58,7 +59,10 @@ final class StimulusExtension extends CompilerExtension
 			->addSetup(
 				'?->onCompile[] = fn (Latte\Engine $engine) => ?->create($engine->getCompiler());',
 				['@self', $definition]
-			);
+			)
+			->addSetup(sprintf('?->addFunction("sController", ["%s", "createController"])', StimulusMacroService::class), ['@self'])
+			->addSetup(sprintf('?->addFunction("sTarget", ["%s", "createTarget"])', StimulusMacroService::class), ['@self'])
+			->addSetup(sprintf('?->addFunction("sAction", ["%s", "createAction"])', StimulusMacroService::class), ['@self']);
 	}
 
 }
