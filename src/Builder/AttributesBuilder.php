@@ -2,47 +2,82 @@
 
 namespace WebChemistry\Stimulus\Builder;
 
+use Latte\Runtime\Filters;
 use Nette\Utils\Json;
 use Nette\Utils\Strings;
 
 final class AttributesBuilder
 {
 
-	/** @var string[] */
+	/** @var array<string, string> */
 	private array $attributes = [];
 
-	public function addControllerAttribute(string $controller): void
+	public function addController(string $controller): void
 	{
-		$this->appendDataAttribute('controller', self::controllerName($controller));
+		$this->appendToAttribute('data-controller', self::controllerName($controller));
 	}
 
-	public function addControllerDataAttribute(string $controller, string $name, mixed $value): void
+	public function addTarget(string $controller, string $target): void
 	{
-		$key = sprintf('%s-%s', self::controllerName($controller), self::camel2Dashed($name));
-
-		$this->addDataAttribute($key, $value);
+		$this->appendToAttribute(
+			$this->buildDataAttributeName(self::controllerName($controller), 'target'),
+			$target,
+		);
 	}
 
-	public function addDataAttribute(string $name, mixed $value): void
+	public function addValue(string $controller, string $valueName, string|int|float|bool|array $value): void
 	{
-		$this->attributes[sprintf('data-%s', $name)] = $this->convertToString($value);
+		$this->appendToAttribute(
+			$this->buildDataAttributeName(self::controllerName($controller), self::camel2Dashed($valueName), 'value'),
+			$value,
+		);
 	}
 
-	public function appendDataAttribute(string $name, mixed $value): void
+	public function addParameter(string $controller, string $paramName, string|int|float|bool|array $value): void
 	{
-		$key = sprintf('data-%s', $name);
-		$value = $this->convertToString($value);
+		$this->appendToAttribute(
+			$this->buildDataAttributeName(self::controllerName($controller), self::camel2Dashed($paramName), 'param'),
+			$value,
+		);
+	}
 
-		if (isset($this->attributes[$key])) {
-			$this->attributes[$key] .= ' ' . $value;
+	public function addClass(string $controller, string $valueName, string $class): void
+	{
+		$this->appendToAttribute(
+			$this->buildDataAttributeName(self::controllerName($controller), self::camel2Dashed($valueName), 'class'),
+			$class,
+		);
+	}
+
+	public function addAction(string $action): void
+	{
+		$this->appendToAttribute('data-action', $action);
+	}
+
+	private function buildDataAttributeName(string ... $names): string
+	{
+		$attr = 'data-';
+		foreach ($names as $name) {
+			if ($name) {
+				$attr .= $name . '-';
+			}
+		}
+
+		return substr($attr, 0, -1);
+	}
+
+	private function appendToAttribute(string $attribute, mixed $value): void
+	{
+		if (isset($this->attributes[$attribute])) {
+			$this->attributes[$attribute] .= ' ' . $this->convertToString($value);
 		} else {
-			$this->attributes[$key] = $value;
+			$this->attributes[$attribute] = $this->convertToString($value);
 		}
 	}
 
-	private function attributeValue(string $string): string
+	private function escapeAttributeValue(string $value): string
 	{
-		return '"' . htmlspecialchars($string, ENT_QUOTES) . '"';
+		return Filters::escapeHtmlAttr($value);
 	}
 
 	public static function camel2Dashed(string $string): string
@@ -62,15 +97,15 @@ final class AttributesBuilder
 
 	private function convertToString(mixed $value): string
 	{
-		if (is_array($value)) {
-			return Json::encode($value);
+		if (is_bool($value)) {
+			return $value ? '1' : '0';
 		}
 
-		if ($value === false) {
-			return '0';
+		if (is_string($value)) {
+			return $value;
 		}
 
-		return (string) $value;
+		return Json::encode($value);
 	}
 
 	public function toArray(): array
@@ -82,10 +117,10 @@ final class AttributesBuilder
 	{
 		$html = '';
 		foreach ($this->attributes as $attribute => $value) {
-			$html .= sprintf(' %s=%s', $attribute, $this->attributeValue($value));
+			$html .= sprintf(' %s="%s"', $attribute, $this->escapeAttributeValue($value));
 		}
 
-		return ltrim($html);
+		return substr($html, 1);
 	}
 
 }

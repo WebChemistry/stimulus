@@ -5,40 +5,20 @@ namespace WebChemistry\Stimulus\DI;
 use Nette\Bridges\ApplicationLatte\LatteFactory;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\FactoryDefinition;
-use Nette\Schema\Expect;
-use Nette\Schema\Schema;
-use stdClass;
+use WebChemistry\Stimulus\Html\StimulusActionAttribute;
+use WebChemistry\Stimulus\Html\StimulusControllerAttribute;
+use WebChemistry\Stimulus\Html\StimulusTargetAttribute;
 use WebChemistry\Stimulus\Latte\StimulusMacros;
-use WebChemistry\Stimulus\Latte\StimulusMacroService;
 
 final class StimulusExtension extends CompilerExtension
 {
 
-	public function getConfigSchema(): Schema
-	{
-		return Expect::structure([
-			'names' => Expect::structure([
-				'controller' => Expect::string('s'),
-				'action' => Expect::string('s-action'),
-				'target' => Expect::string('s-target'),
-			]),
-			'templates' => Expect::arrayOf(Expect::string()),
-		]);
-	}
-
 	public function loadConfiguration(): void
 	{
-		/** @var stdClass $config */
-		$config = $this->getConfig();
 		$builder = $this->getContainerBuilder();
 
 		$builder->addDefinition($this->prefix('macros'))
-			->setFactory(StimulusMacros::class, [
-				$config->names->controller,
-				$config->names->action,
-				$config->names->target,
-				$config->templates,
-			]);
+			->setFactory(StimulusMacros::class);
 	}
 
 	public function beforeCompile(): void
@@ -60,9 +40,27 @@ final class StimulusExtension extends CompilerExtension
 				'?->onCompile[] = fn (Latte\Engine $engine) => ?->create($engine->getCompiler());',
 				['@self', $definition]
 			)
-			->addSetup(sprintf('?->addFunction("sController", ["%s", "createController"])', StimulusMacroService::class), ['@self'])
-			->addSetup(sprintf('?->addFunction("sTarget", ["%s", "createTarget"])', StimulusMacroService::class), ['@self'])
-			->addSetup(sprintf('?->addFunction("sAction", ["%s", "createAction"])', StimulusMacroService::class), ['@self']);
+			->addSetup(
+				sprintf(
+					'?->addFunction("stimulusController", fn (...$args) => new %s(...$args))',
+					StimulusControllerAttribute::class
+				),
+				['@self']
+			)
+			->addSetup(
+				sprintf(
+					'?->addFunction("stimulusAction", fn (...$args) => new %s(...$args))',
+					StimulusActionAttribute::class
+				),
+				['@self']
+			)
+			->addSetup(
+				sprintf(
+					'?->addFunction("stimulusTarget", fn (...$args) => new %s(...$args))',
+					StimulusTargetAttribute::class
+				),
+				['@self']
+			);
 	}
 
 }
