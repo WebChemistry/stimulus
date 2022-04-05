@@ -2,6 +2,7 @@
 
 namespace WebChemistry\Stimulus\Builder;
 
+use DateTimeInterface;
 use Latte\Runtime\Filters;
 use Nette\Utils\Json;
 use Nette\Utils\Strings;
@@ -25,7 +26,7 @@ final class AttributesBuilder
 		);
 	}
 
-	public function addValue(string $controller, string $valueName, string|int|float|bool|array $value): void
+	public function addValue(string $controller, string $valueName, string|int|float|bool|array|DateTimeInterface $value): void
 	{
 		$this->appendToAttribute(
 			$this->buildDataAttributeName(self::controllerName($controller), self::camel2Dashed($valueName), 'value'),
@@ -33,7 +34,7 @@ final class AttributesBuilder
 		);
 	}
 
-	public function addParameter(string $controller, string $paramName, string|int|float|bool|array $value): void
+	public function addParameter(string $controller, string $paramName, string|int|float|bool|array|DateTimeInterface $value): void
 	{
 		$this->appendToAttribute(
 			$this->buildDataAttributeName(self::controllerName($controller), self::camel2Dashed($paramName), 'param'),
@@ -103,6 +104,10 @@ final class AttributesBuilder
 
 		if (is_string($value)) {
 			return $value;
+		}
+
+		if ($value instanceof DateTimeInterface) {
+			return $value->format(DateTimeInterface::ATOM);
 		}
 
 		return Json::encode($value);
