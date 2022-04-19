@@ -3,6 +3,7 @@
 namespace WebChemistry\Stimulus\Html;
 
 use Nette\Forms\Controls\BaseControl;
+use Nette\Forms\Form;
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
 
 final class StimulusAttributeRenderer
@@ -15,6 +16,15 @@ final class StimulusAttributeRenderer
 		}
 
 		return $control;
+	}
+
+	public static function form(Form $form, StimulusAttributeRenderable ...$fragments): Form
+	{
+		foreach (self::toArray(...$fragments) as $name => $value) {
+			$form->setHtmlAttribute($name, $value);
+		}
+
+		return $form;
 	}
 
 	public static function render(StimulusAttributeRenderable ... $fragments): string
