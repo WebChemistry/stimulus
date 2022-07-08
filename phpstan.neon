@@ -1,0 +1,8 @@
+parameters:
+	level: 7
+	excludePaths:
+		analyse:
+			# deprecated
+			- src/Builder
+			- src/Html
+			- src/Html

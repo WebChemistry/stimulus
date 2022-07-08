@@ -5,6 +5,9 @@ namespace WebChemistry\Stimulus\Html;
 use Utilitte\Php\Strings;
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
 
+/**
+ * @deprecated
+ */
 final class StimulusActionAttribute implements StimulusAttributeRenderable
 {
 

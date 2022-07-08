@@ -1,11 +1,23 @@
 {
 	"name": "webchemistry/stimulus",
 	"require": {
-		"php": ">=8.0"
+		"php": ">=8.0",
+		"nette/php-generator": "^4.0",
+		"doctrine/lexer": "^1.2",
+		"nette/finder": "^2.5",
+		"utilitte/php": "^1.5",
+		"webchemistry/simple-json": "^1.0"
 	},
 	"autoload": {
 		"psr-4": {
 			"WebChemistry\\Stimulus\\": "src"
 		}
+	},
+	"require-dev": {
+		"phpstan/phpstan": "^1.8",
+		"latte/latte": "^2.10.0",
+		"nette/forms": "^3.1",
+		"nette/di": "^3.0",
+		"nette/application": "^3.1"
 	}
 }

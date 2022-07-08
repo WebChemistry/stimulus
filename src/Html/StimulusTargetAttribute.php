@@ -4,6 +4,9 @@ namespace WebChemistry\Stimulus\Html;
 
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
 
+/**
+ * @deprecated
+ */
 final class StimulusTargetAttribute implements StimulusAttributeRenderable
 {
 

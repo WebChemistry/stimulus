@@ -3,11 +3,7 @@
 namespace WebChemistry\Stimulus\Latte;
 
 use Latte\Compiler;
-use Latte\MacroNode;
 use Latte\Macros\MacroSet;
-use Latte\PhpWriter;
-use LogicException;
-use WebChemistry\Stimulus\Html\StimulusAttributeRenderer;
 use WebChemistry\Stimulus\Html\StimulusHtml;
 use WebChemistry\Stimulus\Html\StimulusHtmlRenderer;
 
@@ -22,7 +18,7 @@ final class StimulusMacros
 			'stimulus',
 			null,
 			null,
-			sprintf('%%node.line echo " "; echo %s::render(%%node.args);', StimulusAttributeRenderer::class)
+			sprintf('%%node.line echo " "; echo %s::render(%%node.args);', StimulusMacroService::class)
 		);
 
 		return $me;

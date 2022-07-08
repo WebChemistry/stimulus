@@ -6,6 +6,9 @@ use Nette\Forms\Controls\BaseControl;
 use Nette\Forms\Form;
 use WebChemistry\Stimulus\Builder\AttributesBuilder;
 
+/**
+ * @deprecated
+ */
 final class StimulusAttributeRenderer
 {
 

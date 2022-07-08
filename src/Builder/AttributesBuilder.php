@@ -7,6 +7,9 @@ use Latte\Runtime\Filters;
 use Nette\Utils\Json;
 use Nette\Utils\Strings;
 
+/**
+ * @deprecated
+ */
 final class AttributesBuilder
 {
 
