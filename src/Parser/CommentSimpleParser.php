@@ -2,6 +2,8 @@
 
 namespace WebChemistry\Stimulus\Parser;
 
+use Nette\Utils\Strings;
+
 final class CommentSimpleParser
 {
 
@@ -23,7 +25,7 @@ final class CommentSimpleParser
 	 */
 	public static function parse(string $comment, array $annotations): array
 	{
-		$comment = preg_replace('#^\s*\*+#m', '', trim($comment, '/'));
+		$comment = Strings::replace(trim($comment, '/'), '#^\s*\*+#m', '');
 
 		return (new self($comment, $annotations))->process();
 	}

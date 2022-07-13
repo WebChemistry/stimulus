@@ -5,6 +5,8 @@ namespace WebChemistry\Stimulus\Generator\Extractor;
 use LogicException;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Finder;
+use SplFileInfo;
+use Utilitte\Asserts\TypeAssert;
 use WebChemistry\SimpleJson\Exception\SimpleJsonSyntaxError;
 use WebChemistry\SimpleJson\SimpleJsonParser;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedAction;
@@ -38,6 +40,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 		$offset = strlen($this->baseDir) + 1;
 		$files = [];
 
+		/** @var SplFileInfo $file */
 		foreach (Finder::findFiles('*_controller.js', '*-controller.js')->from($this->baseDir) as $file) {
 			$source = strtr(substr($file->getPathname(), $offset), ['\\' => '/']);
 
@@ -158,7 +161,11 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 									$variable = substr($variable, 0, -1);
 									$required = false;
 								} else {
-									$required = !in_array($variable, $options['optional'] ?? [], true);
+									$required = !in_array(
+										$variable,
+										$this->getArrayFromOptions($options, 'optional'),
+										true,
+									);
 								}
 
 								$params[$variable] = new ExtractedActionParameter(
@@ -182,7 +189,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 								try {
 									$variables = SimpleJsonParser::parse($matches[1]);
-								} catch (SimpleJsonSyntaxError $e) {
+								} catch (SimpleJsonSyntaxError) {
 									continue;
 								}
 
@@ -191,23 +198,29 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 									$options = SimpleJsonParser::parse($str);
 								}
 
-								$optional = $options['optional'] ?? [];
-
+								/**
+								 * @var string $variableName
+								 * @var string $type
+								 */
 								foreach ($variables as $variableName => $type) {
 									if (str_ends_with($variableName, '?')) {
 										$variableName = substr($variableName, 0, -1);
 										$required = false;
 									} else {
-										$required = !in_array($variableName, $optional, true);
+										$required = !in_array(
+											$variableName,
+											$this->getArrayFromOptions($options, 'optional'),
+											true,
+										);
 									}
 
-									$type = $this->resolveType($type);
+									$resolvedType = $this->resolveType($type);
 
 									$params[$variableName] = new ExtractedActionParameter(
 										$variableName,
-										$type->getType(),
+										$resolvedType->getType(),
 										$required,
-										$type->getCommentType(),
+										$resolvedType->getCommentType(),
 									);
 								}
 							}
@@ -254,30 +267,45 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 	/**
 	 * @param mixed[] $options
+	 * @return mixed[]
+	 */
+	private function getArrayFromOptions(array $options, string $index): array
+	{
+		if (!isset($options[$index])) {
+			return [];
+		}
+
+		return is_array($options[$index]) ? $options[$index] : [];
+	}
+
+	/**
+	 * @param mixed[] $options
 	 */
 	private function resolveType(string $type, array $options = []): ResolvedType
 	{
+		$commentType = TypeAssert::stringOrNull($options['commentType'] ?? null);
+
 		if (isset($options['type'])) {
-			return new ResolvedType($options['type'], $options['commentType'] ?? null);
+			return new ResolvedType(TypeAssert::string($options['type']), $commentType);
 		}
 
 		$type = trim(trim($type, '{}'));
 
 		if (str_contains($type, '[')) {
 			return match (strtolower($type)) {
-				'string[]' => new ResolvedType('array', ($options['commentType'] ?? 'string[]')),
-				'boolean[]', 'bool[]' => new ResolvedType('array', ($options['commentType'] ?? 'bool[]')),
-				'number[]' => new ResolvedType('array', ($options['commentType'] ?? 'array<' . ($options['number'] ?? 'int|float') .'>')),
-				default => new ResolvedType('array', ($options['commentType'] ?? 'mixed[]')),
+				'string[]' => new ResolvedType('array', ($commentType ?? 'string[]')),
+				'boolean[]', 'bool[]' => new ResolvedType('array', ($commentType ?? 'bool[]')),
+				'number[]' => new ResolvedType('array', ($commentType ?? 'array<' . (TypeAssert::string($options['number'] ?? 'int|float')) .'>')),
+				default => new ResolvedType('array', ($commentType ?? 'mixed[]')),
 			};
 		}
 
 		return match (strtolower($type)) {
-			'string' => new ResolvedType('string', $options['commentType'] ?? null),
-			'boolean', 'bool' => new ResolvedType('bool', $options['commentType'] ?? null),
-			'number' => new ResolvedType($options['number'] ?? 'int|float', $options['commentType'] ?? null),
-			'object' => new ResolvedType('array', ($options['commentType'] ?? 'mixed[]')),
-			default => new ResolvedType('mixed', $options['commentType'] ?? null),
+			'string' => new ResolvedType('string', $commentType ?? null),
+			'boolean', 'bool' => new ResolvedType('bool', $commentType ?? null),
+			'number' => new ResolvedType(TypeAssert::string($options['number'] ?? 'int|float'), $commentType ?? null),
+			'object' => new ResolvedType('array', ($commentType ?? 'mixed[]')),
+			default => new ResolvedType('mixed', $commentType ?? null),
 		};
 	}
 

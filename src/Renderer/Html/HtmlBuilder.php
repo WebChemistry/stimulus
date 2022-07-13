@@ -42,7 +42,7 @@ final class HtmlBuilder
 
 	public function camel2Dashed(string $string): string
 	{
-		return strtolower(preg_replace('#([a-zA-Z])(?=[A-Z])#', '$1-', Strings::firstLower($string)));
+		return Strings::replace(Strings::firstLower($string), '#([a-zA-Z])(?=[A-Z])#', '$1-');
 	}
 
 	private function convertToString(mixed $value): string

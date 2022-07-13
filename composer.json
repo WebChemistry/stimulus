@@ -6,7 +6,8 @@
 		"doctrine/lexer": "^1.2",
 		"nette/finder": "^2.5",
 		"utilitte/php": "^1.5",
-		"webchemistry/simple-json": "^1.0"
+		"webchemistry/simple-json": "^1.0",
+		"utilitte/asserts": "^1.3"
 	},
 	"autoload": {
 		"psr-4": {

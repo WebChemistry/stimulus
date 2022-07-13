@@ -41,7 +41,7 @@ final class HtmlRenderer
 
 	/**
 	 * @param HtmlBuilder $builder
-	 * @param array<StimulusType|mixed[]|null> $types
+	 * @param mixed[] $types
 	 */
 	private static function processTypes(HtmlBuilder $builder, array $types): void
 	{

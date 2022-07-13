@@ -2,6 +2,8 @@
 
 namespace WebChemistry\Stimulus\Generator\ClassName;
 
+use Nette\Utils\Strings;
+
 final class BaseClassNameConverter implements ClassNameConverter
 {
 
@@ -28,9 +30,9 @@ final class BaseClassNameConverter implements ClassNameConverter
 				continue;
 			}
 
-			$names[] = ucfirst(preg_replace_callback('#-([a-zA-Z])#', function (array $matches): string {
+			$names[] = ucfirst(Strings::replace($namespace, '#-([a-zA-Z])#', function (array $matches): string {
 				return ucfirst($matches[1]);
-			}, $namespace));
+			}));
 		}
 
 		return implode('\\', $names); // @phpstan-ignore-line
