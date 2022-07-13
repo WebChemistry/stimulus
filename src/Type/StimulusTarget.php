@@ -2,7 +2,7 @@
 
 namespace WebChemistry\Stimulus\Type;
 
-final class StimulusTarget
+final class StimulusTarget implements StimulusType
 {
 
 	public function __construct(

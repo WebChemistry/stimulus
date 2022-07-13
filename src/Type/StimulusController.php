@@ -2,7 +2,7 @@
 
 namespace WebChemistry\Stimulus\Type;
 
-final class StimulusController
+final class StimulusController implements StimulusType
 {
 
 	/**

@@ -2,7 +2,7 @@
 
 namespace WebChemistry\Stimulus\Type;
 
-final class StimulusAction
+final class StimulusAction implements StimulusType
 {
 
 	private bool $capture = false;
