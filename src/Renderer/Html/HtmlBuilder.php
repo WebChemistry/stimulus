@@ -23,6 +23,14 @@ final class HtmlBuilder
 		return substr($html, 1);
 	}
 
+	/**
+	 * @return array<string, string> attribute => value
+	 */
+	public function toArray(): array
+	{
+		return $this->attributes;
+	}
+
 	public function appendAttribute(string $attribute, mixed $value): void
 	{
 		if (isset($this->attributes[$attribute])) {
