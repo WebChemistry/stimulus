@@ -15,6 +15,7 @@ final class FilesystemWriter implements StimulusWriter
 	public function __construct(
 		private string $baseDir,
 		private string $baseNamespace = '',
+		private bool $overwrite = true,
 		?Printer $printer = null,
 	)
 	{
@@ -30,13 +31,15 @@ final class FilesystemWriter implements StimulusWriter
 		}
 
 		$dir = $this->getDirectoryByClassName($className);
-
+		
+		$fileName = $dir . '/' . Helpers::extractShortName($className) . '.php';
+ 
+		if (!$this->overwrite && file_exists($fileName)) {
+			return;
+		}
+		
 		FileSystem::createDir($dir);
-
-		FileSystem::write(
-			$dir . '/' . Helpers::extractShortName($className) . '.php',
-			$this->printer->printFile($generated->getFile())
-		);
+		FileSystem::write($fileName, $this->printer->printFile($generated->getFile()));
 	}
 
 	private function getDirectoryByClassName(string $className): string
