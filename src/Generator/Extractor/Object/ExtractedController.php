@@ -10,6 +10,7 @@ class ExtractedController
 	 * @param ExtractedAction[] $actions
 	 * @param ExtractedTarget[] $targets
 	 * @param ExtractedClass[] $classes
+	 * @param ExtractedEvent[] $events
 	 * @param mixed[] $context
 	 */
 	public function __construct(
@@ -18,6 +19,7 @@ class ExtractedController
 		private array $actions,
 		private array $targets,
 		private array $classes,
+		private array $events,
 		private array $context = [],
 	)
 	{
@@ -58,6 +60,14 @@ class ExtractedController
 	public function getClasses(): array
 	{
 		return $this->classes;
+	}
+
+	/**
+	 * @return ExtractedEvent[]
+	 */
+	public function getEvents(): array
+	{
+		return $this->events;
 	}
 
 	/**
