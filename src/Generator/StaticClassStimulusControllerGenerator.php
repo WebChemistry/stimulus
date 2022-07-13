@@ -16,6 +16,7 @@ use WebChemistry\Stimulus\Generator\Extractor\StimulusExtractor;
 use WebChemistry\Stimulus\Helper\ControllerHelper;
 use WebChemistry\Stimulus\Type\StimulusAction;
 use WebChemistry\Stimulus\Type\StimulusController;
+use WebChemistry\Stimulus\Type\StimulusEvent;
 use WebChemistry\Stimulus\Type\StimulusTarget;
 
 final class StaticClassStimulusControllerGenerator implements StimulusControllerGenerator
@@ -58,10 +59,9 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 			$class = $namespace->addClass(Helpers::extractShortName($className))
 				->setAbstract();
 
-			$class->addProperty('name', $controller->getName())
-				->setVisibility('protected')
-				->setType('string')
-				->setStatic();
+			$class->addConstant('identifier', $controller->getName())
+				->setFinal(PHP_VERSION_ID >= 80100)
+				->setVisibility('public');
 
 			$valuesAndClasses = $this->sortValuesAndClassesByRequired($controller->getValues(), $controller->getClasses());
 
@@ -71,7 +71,7 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 
 			$constructor->addBody(
 				sprintf(
-					'return new %s(self::$name, %s, %s);',
+					'return new %s(self::identifier, %s, %s);',
 					$namespace->simplifyType(StimulusController::class),
 					ControllerHelper::argumentMap(
 						array_map(fn (ExtractedValue $value) => $value->getName(), $controller->getValues()),
@@ -103,15 +103,15 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 
 				$method->addBody(
 					sprintf(
-						'return new %s(self::$name, "%s", %s);',
+						'return new %s(self::identifier, ?, %s);',
 						$namespace->simplifyType(StimulusAction::class),
-						$action->getName(),
 						ControllerHelper::argumentMap(
 							array_map(fn (ExtractedActionParameter $parameter) => $parameter->getName(), $action->getParameters()),
 							'Param',
 							1,
 						),
-					)
+					),
+					[$action->getName()]
 				);
 
 				foreach ($action->getParameters() as $parameter) {
@@ -137,9 +137,18 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 				$namespace->addUse(StimulusTarget::class);
 
 				$class->addMethod($target->getName())
-					->addBody(sprintf('return new %s(self::$name, "%s");', $namespace->simplifyType(StimulusTarget::class), $target->getName()))
+					->addBody(sprintf('return new %s(self::identifier, ?);', $namespace->simplifyType(StimulusTarget::class)), [$target->getName()])
 					->setStatic()
 					->setReturnType(StimulusTarget::class);
+			}
+
+			foreach ($controller->getEvents() as $event) {
+				$namespace->addUse(StimulusEvent::class);
+
+				$class->addMethod($event->getName() . 'Event')
+					->addBody(sprintf('return new %s(self::identifier, ?);', $namespace->simplifyType(StimulusEvent::class)), [$event->getName()])
+					->setStatic()
+					->setReturnType(StimulusEvent::class);
 			}
 
 			$generated[] = new GeneratedController($file, $controller, $className);
