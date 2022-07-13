@@ -15,7 +15,6 @@ final class BaseClassNameConverter implements ClassNameConverter
 	}
 
 	/**
-	 * @param (callable(string): string)|null $converter
 	 * @return class-string
 	 */
 	public function convertToClassName(string $name): string
