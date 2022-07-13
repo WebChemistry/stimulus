@@ -5,14 +5,16 @@ namespace WebChemistry\Stimulus\Latte;
 use WebChemistry\Stimulus\Html\StimulusAttributeRenderable;
 use WebChemistry\Stimulus\Html\StimulusAttributeRenderer;
 use WebChemistry\Stimulus\Renderer\HtmlRenderer;
-use WebChemistry\Stimulus\Type\StimulusAction;
-use WebChemistry\Stimulus\Type\StimulusController;
-use WebChemistry\Stimulus\Type\StimulusTarget;
+use WebChemistry\Stimulus\Type\StimulusType;
 
 final class StimulusMacroService
 {
 
-	public static function render(StimulusAttributeRenderable|StimulusAction|StimulusTarget|StimulusController ... $fragments): string
+	/**
+	 * @param StimulusAttributeRenderable|StimulusType|StimulusType[]|null ...$fragments
+	 * @return string
+	 */
+	public static function render(StimulusAttributeRenderable|StimulusType|array|null ... $fragments): string
 	{
 		if (($fragments[0] ?? null) instanceof StimulusAttributeRenderable) { // backward compatability
 			return StimulusAttributeRenderer::render(...$fragments); // @phpstan-ignore-line
