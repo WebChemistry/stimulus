@@ -4,6 +4,7 @@ namespace WebChemistry\Stimulus\Generator;
 
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\PhpFile;
+use Utilitte\Asserts\TypeAssert;
 use WebChemistry\Stimulus\Generator\ClassName\ClassNameConverter;
 use WebChemistry\Stimulus\Generator\Extractor\StimulusExtractor;
 
@@ -38,6 +39,10 @@ final class EmptyClassStimulusControllerGenerator implements StimulusControllerG
 			$class = $namespace->addClass(Helpers::extractShortName($className))
 				->setExtends($originalClassName)
 				->setFinal();
+
+			if (($deprecated = $controller->getContext()['deprecated'] ?? null) !== null) {
+				$class->addComment(trim(sprintf('@deprecated %s', TypeAssert::string($deprecated))));
+			}
 
 			$generated[] = new GeneratedController($file, $controller, $className);
 		}

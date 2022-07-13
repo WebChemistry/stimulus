@@ -69,6 +69,9 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 				preg_match_all('#/\*\*.*?\*/\s*([a-zA-Z]\w+)?#s', $content, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 
 				$extract = false;
+				$context = [
+					'source' => $source,
+				];
 				$targets = $values = $classes = $actions = $events = [];
 
 				foreach ($matches as $match) {
@@ -80,7 +83,8 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 						// @property {0: type} {1: name} {2?: options}
 						// @dispatch {0: name}
-						foreach (CommentSimpleParser::parse($comment, ['property', 'dispatch']) as [$annotation, $arguments]) {
+						// @deprecated {0?: description}
+						foreach (CommentSimpleParser::parse($comment, ['property', 'dispatch', 'deprecated']) as [$annotation, $arguments]) {
 							if ($annotation === 'property') {
 								if (!isset($arguments[0]) || !isset($arguments[1])) {
 									continue; // missing type and name
@@ -127,7 +131,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 									$classes[$name] = new ExtractedClass($name, $required);
 								}
 
-							} else {
+							} else if ($annotation === 'dispatch') {
 								if (!isset($arguments[0])) {
 									continue; // missing name
 								}
@@ -135,6 +139,8 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 								$name = $arguments[0];
 
 								$events[$name] = new ExtractedEvent($name);
+							} else if ($annotation === 'deprecated') {
+								$context['deprecated'] = $arguments[0] ?? '';
 							}
 						}
 
@@ -234,16 +240,14 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 					continue;
 				}
 
-				$this->controllers[] = new ExtractedController(
+				$this->controllers[] = $extractedController = new ExtractedController(
 					$controllerName,
 					$values,
 					$actions,
 					$targets,
 					$classes,
 					$events,
-					[
-						'source' => $source,
-					]
+					$context,
 				);
 			}
 		}

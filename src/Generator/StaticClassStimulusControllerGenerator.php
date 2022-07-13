@@ -7,6 +7,7 @@ use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Parameter;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
+use Utilitte\Asserts\TypeAssert;
 use WebChemistry\Stimulus\Generator\ClassName\ClassNameConverter;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedActionParameter;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedClass;
@@ -62,6 +63,10 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 			$class->addConstant('identifier', $controller->getName())
 				->setFinal(PHP_VERSION_ID >= 80100)
 				->setVisibility('public');
+
+			if (($deprecated = $controller->getContext()['deprecated'] ?? null) !== null) {
+				$class->addComment(trim(sprintf('@deprecated %s', TypeAssert::string($deprecated))));
+			}
 
 			$valuesAndClasses = $this->sortValuesAndClassesByRequired($controller->getValues(), $controller->getClasses());
 
