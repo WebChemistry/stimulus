@@ -5,10 +5,6 @@ namespace WebChemistry\Stimulus\DI;
 use Nette\Bridges\ApplicationLatte\LatteFactory;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\FactoryDefinition;
-use Nette\DI\Definitions\ServiceDefinition;
-use WebChemistry\Stimulus\Html\StimulusActionAttribute;
-use WebChemistry\Stimulus\Html\StimulusControllerAttribute;
-use WebChemistry\Stimulus\Html\StimulusTargetAttribute;
 use WebChemistry\Stimulus\Latte\StimulusMacros;
 
 final class StimulusExtension extends CompilerExtension
@@ -40,33 +36,6 @@ final class StimulusExtension extends CompilerExtension
 			->addSetup(
 				'?->onCompile[] = fn (Latte\Engine $engine) => ?->create($engine->getCompiler());',
 				['@self', $definition]
-			);
-
-		$this->deprecatedThings($service->getResultDefinition());
-	}
-
-	private function deprecatedThings(ServiceDefinition $definition): void
-	{
-		$definition->addSetup(
-				sprintf(
-					'?->addFunction("stimulusController", fn (...$args) => new %s(...$args))',
-					StimulusControllerAttribute::class
-				),
-				['@self']
-			)
-			->addSetup(
-				sprintf(
-					'?->addFunction("stimulusAction", fn (...$args) => new %s(...$args))',
-					StimulusActionAttribute::class
-				),
-				['@self']
-			)
-			->addSetup(
-				sprintf(
-					'?->addFunction("stimulusTarget", fn (...$args) => new %s(...$args))',
-					StimulusTargetAttribute::class
-				),
-				['@self']
 			);
 	}
 

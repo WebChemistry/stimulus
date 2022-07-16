@@ -71,7 +71,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 				$extract = false;
 				$deprecated = null;
-				$targets = $values = $classes = $actions = $events = [];
+				$targets = $values = $classes = $actions = $events = $hassers = [];
 
 				foreach ($matches as $match) {
 					$comment = $match[0];
@@ -83,8 +83,6 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 						// @property {0: type} {1: name} {2?: options}
 						// @dispatch {0: name}
 						// @deprecated {0?: description}
-
-						$hassers = [];
 
 						foreach (CommentSimpleParser::parse($comment, ['property', 'dispatch', 'deprecated']) as [$annotation, $arguments]) {
 							if ($annotation === 'property') {
