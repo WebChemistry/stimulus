@@ -27,6 +27,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 	public function __construct(
 		private string $baseDir,
+		private bool $optionalByHasser = true,
 	)
 	{
 		$this->baseDir = FileSystem::normalizePath($this->baseDir);
@@ -69,9 +70,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 				preg_match_all('#/\*\*.*?\*/\s*([a-zA-Z]\w+)?#s', $content, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 
 				$extract = false;
-				$context = [
-					'source' => $source,
-				];
+				$deprecated = null;
 				$targets = $values = $classes = $actions = $events = [];
 
 				foreach ($matches as $match) {
@@ -84,6 +83,9 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 						// @property {0: type} {1: name} {2?: options}
 						// @dispatch {0: name}
 						// @deprecated {0?: description}
+
+						$hassers = [];
+
 						foreach (CommentSimpleParser::parse($comment, ['property', 'dispatch', 'deprecated']) as [$annotation, $arguments]) {
 							if ($annotation === 'property') {
 								if (!isset($arguments[0]) || !isset($arguments[1])) {
@@ -95,6 +97,10 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 								$other = $arguments[2] ?? '';
 
 								if (preg_match('#^has[A-Z]#', $name)) {
+									if ($this->optionalByHasser) {
+										$hassers[] = lcfirst(substr($name, 3));
+									}
+
 									continue;
 								}
 
@@ -140,7 +146,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 
 								$events[$name] = new ExtractedEvent($name);
 							} else if ($annotation === 'deprecated') {
-								$context['deprecated'] = $arguments[0] ?? '';
+								$deprecated = $arguments[0] ?? '';
 							}
 						}
 
@@ -240,14 +246,31 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 					continue;
 				}
 
-				$this->controllers[] = $extractedController = new ExtractedController(
+				if ($hassers) {
+					$values = array_map(
+						fn (ExtractedValue $value) =>
+							in_array($value->getName(), $hassers, true) ? $value->withRequired(false) : $value,
+						$values,
+					);
+
+					$classes = array_map(
+						fn (ExtractedClass $class) =>
+							in_array($class->getName(), $hassers, true) ? $class->withRequired(false) : $class,
+						$classes,
+					);
+				}
+
+				$this->controllers[] = new ExtractedController(
 					$controllerName,
 					$values,
 					$actions,
 					$targets,
 					$classes,
 					$events,
-					$context,
+					[
+						'source' => $source,
+						'deprecated' => $deprecated,
+					]
 				);
 			}
 		}

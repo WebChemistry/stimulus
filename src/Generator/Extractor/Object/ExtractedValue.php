@@ -29,6 +29,14 @@ class ExtractedValue implements ExtractedControllerParameter
 		return $this->required;
 	}
 
+	public function withRequired(bool $required): self
+	{
+		$self = clone $this;
+		$self->required = $required;
+
+		return $self;
+	}
+
 	public function getCommentType(): ?string
 	{
 		return $this->commentType;
