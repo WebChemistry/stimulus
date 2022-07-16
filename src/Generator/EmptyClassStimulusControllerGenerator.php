@@ -34,7 +34,7 @@ final class EmptyClassStimulusControllerGenerator implements StimulusControllerG
 			$file->setStrictTypes();
 
 			$namespace = $file->addNamespace(Helpers::extractNamespace($className));
-			$namespace->addUse($originalClassName, Helpers::extractShortName($originalClassName) . 'Parent');
+			$namespace->addUse($originalClassName, 'ParentController');
 
 			$class = $namespace->addClass(Helpers::extractShortName($className))
 				->setExtends($originalClassName)
