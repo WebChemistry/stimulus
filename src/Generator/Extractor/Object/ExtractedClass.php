@@ -8,6 +8,7 @@ class ExtractedClass implements ExtractedControllerParameter
 	public function __construct(
 		private string $name,
 		private bool $required = false,
+		private bool $multiple = false,
 	)
 	{
 	}
@@ -22,6 +23,11 @@ class ExtractedClass implements ExtractedControllerParameter
 		return $this->required;
 	}
 
+	public function isMultiple(): bool
+	{
+		return $this->multiple;
+	}
+
 	public function withRequired(bool $required): self
 	{
 		$self = clone $this;
@@ -32,12 +38,12 @@ class ExtractedClass implements ExtractedControllerParameter
 
 	public function getType(): string
 	{
-		return 'string';
+		return $this->multiple ? 'string|array' : 'string';
 	}
 
 	public function getCommentType(): ?string
 	{
-		return null;
+		return $this->multiple ? 'string|string[]' : null;
 	}
 
 }

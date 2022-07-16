@@ -130,9 +130,14 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 										$type->getCommentType()
 									);
 								} elseif (str_ends_with($name, 'Class')) {
-									$classes[$name] = new ExtractedClass($name, $required);
+									if (!isset($classes[$name])) {
+										$classes[$name] = new ExtractedClass($name, $required);
+									}
+									
 								} elseif (str_ends_with($name, 'Classes')) {
-									$classes[$name] = new ExtractedClass($name, $required);
+									$name = substr($name, 0, -2);
+
+									$classes[$name] = new ExtractedClass($name, $required, true);
 								}
 
 							} else if ($annotation === 'dispatch') {

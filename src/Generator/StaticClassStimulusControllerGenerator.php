@@ -90,7 +90,7 @@ final class StaticClassStimulusControllerGenerator implements StimulusController
 			foreach ($valuesAndClasses as $value) {
 				$this->addTypeAndDefaultToParameter(
 					$constructor->addParameter($value->getName()),
-					$value instanceof ExtractedClass ? 'string' : $value->getType(),
+					$value->getType(),
 					$value->isRequired(),
 				);
 
