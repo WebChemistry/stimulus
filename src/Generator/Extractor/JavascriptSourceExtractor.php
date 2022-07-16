@@ -331,7 +331,7 @@ final class JavascriptSourceExtractor implements StimulusExtractor
 			'string' => new ResolvedType('string', $commentType ?? null),
 			'boolean', 'bool' => new ResolvedType('bool', $commentType ?? null),
 			'number' => new ResolvedType(TypeAssert::string($options['number'] ?? 'int|float'), $commentType ?? null),
-			'object' => new ResolvedType('array', ($commentType ?? 'mixed[]')),
+			'object', 'array' => new ResolvedType('array', ($commentType ?? 'mixed[]')),
 			default => new ResolvedType('mixed', $commentType ?? null),
 		};
 	}
