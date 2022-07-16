@@ -7,7 +7,7 @@ final class StimulusController implements StimulusType
 
 	/**
 	 * @param array<string, mixed> $values
-	 * @param array<string, string|null> $classes
+	 * @param array<string, string[]|string|null> $classes
 	 */
 	public function __construct(
 		private string $name,
@@ -31,7 +31,7 @@ final class StimulusController implements StimulusType
 	}
 
 	/**
-	 * @return array<string, string|null>
+	 * @return array<string, string[]|string|null>
 	 */
 	public function getClasses(): array
 	{

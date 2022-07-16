@@ -48,7 +48,7 @@ final class HtmlRenderer
 		foreach ($types as $type) {
 			if ($type === null) {
 				continue;
-				
+
 			} else if (is_array($type)) {
 				self::processTypes($builder, $type);
 
@@ -123,7 +123,7 @@ final class HtmlRenderer
 
 			$builder->appendAttribute(
 				sprintf('data-%s-%s', $controller->getName(), $builder->camel2Dashed($name)),
-				$value,
+				is_array($value) ? implode(' ', $value) : $value,
 			);
 		}
 	}
