@@ -2,11 +2,9 @@
 
 namespace WebChemistry\Stimulus\Generator;
 
-use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Parameter;
 use Nette\PhpGenerator\PhpFile;
-use Nette\PhpGenerator\PhpNamespace;
 use Utilitte\Asserts\TypeAssert;
 use WebChemistry\Stimulus\Generator\ClassName\ClassNameConverter;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedActionParameter;

@@ -2,7 +2,7 @@
 	"name": "webchemistry/stimulus",
 	"require": {
 		"php": ">=8.0",
-		"nette/php-generator": "^3.5.0",
+		"nette/php-generator": "^3.5.0 || ^4.0.0",
 		"doctrine/lexer": "^1.2",
 		"nette/finder": "^2.5",
 		"utilitte/php": "^1.5",
