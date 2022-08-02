@@ -1,2 +1,5 @@
 parameters:
 	level: 9
+	excludePaths:
+		analyse:
+			- src/Latte/StimulusMacros.php

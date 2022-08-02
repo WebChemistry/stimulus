@@ -2,7 +2,6 @@
 
 namespace WebChemistry\Stimulus\Latte;
 
-use Latte\Compiler;
 use Latte\Macros\MacroSet;
 
 final class StimulusMacros
