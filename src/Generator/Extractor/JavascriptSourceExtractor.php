@@ -6,7 +6,7 @@ use LogicException;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Finder;
 use SplFileInfo;
-use Utilitte\Asserts\TypeAssert;
+use Typertion\Php\TypeAssert;
 use WebChemistry\SimpleJson\Exception\SimpleJsonSyntaxError;
 use WebChemistry\SimpleJson\SimpleJsonParser;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedAction;

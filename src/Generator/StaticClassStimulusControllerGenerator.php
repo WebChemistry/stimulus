@@ -5,7 +5,7 @@ namespace WebChemistry\Stimulus\Generator;
 use Nette\PhpGenerator\Helpers;
 use Nette\PhpGenerator\Parameter;
 use Nette\PhpGenerator\PhpFile;
-use Utilitte\Asserts\TypeAssert;
+use Typertion\Php\TypeAssert;
 use WebChemistry\Stimulus\Generator\ClassName\ClassNameConverter;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedActionParameter;
 use WebChemistry\Stimulus\Generator\Extractor\Object\ExtractedClass;
