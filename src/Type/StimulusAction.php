@@ -5,11 +5,8 @@ namespace WebChemistry\Stimulus\Type;
 final class StimulusAction implements StimulusType
 {
 
-	private bool $capture = false;
-
-	private bool $once = false;
-
-	private ?bool $passive = null;
+	/** @var array<string, string> */
+	private array $options = [];
 
 	private ?string $event = null;
 
@@ -41,9 +38,63 @@ final class StimulusAction implements StimulusType
 		return $this;
 	}
 
-	public function capture(bool $capture = true): self
+	/**
+	 * { capture: true }
+	 */
+	public function capture(?bool $capture = true): self
 	{
-		$this->capture = $capture;
+		$this->setOption('capture', $capture ?: null);
+
+		return $this;
+	}
+
+	/**
+	 * { once: true }
+	 */
+	public function once(?bool $once = true): self
+	{
+		$this->setOption('once', $once ?: null);
+
+		return $this;
+	}
+
+	/**
+	 * true = { passive: false }
+	 * false = { passive: true }
+	 */
+	public function passive(?bool $passive = true): self
+	{
+		$this->setOption('passive', $passive);
+
+		return $this;
+	}
+
+	/**
+	 * Calls .stopPropagation() on the event before invoking the method
+	 */
+	public function stop(?bool $stop = true): self
+	{
+		$this->setOption('stop', $stop ?: null);
+
+		return $this;
+	}
+
+	/**
+	 * Calls .preventDefault() on the event before invoking the method
+	 */
+	public function prevent(?bool $prevent = true): self
+	{
+		$this->setOption('prevent', $prevent ?: null);
+
+		return $this;
+	}
+
+	/**
+	 * Only invokes the method if the event was fired by the element itself
+	 */
+	public function self(?bool $self = true): self
+	{
+		$this->setOption('self', $self ?: null);
 
 		return $this;
 	}
@@ -56,11 +107,6 @@ final class StimulusAction implements StimulusType
 		return $this->parameters;
 	}
 
-	public function isCapture(): bool
-	{
-		return $this->capture;
-	}
-
 	public function getEvent(): ?string
 	{
 		return $this->event;
@@ -68,7 +114,18 @@ final class StimulusAction implements StimulusType
 
 	public function hasOptions(): bool
 	{
-		return $this->capture || $this->once || $this->passive !== null;
+		return (bool) $this->options;
+	}
+
+	public function setOption(string $name, ?bool $value): self
+	{
+		if ($value === null) {
+			unset($this->options[$name]);
+		} else {
+			$this->options[$name] = $value ? $name : '!' . $name;
+		}
+
+		return $this;
 	}
 
 	/**
@@ -76,11 +133,7 @@ final class StimulusAction implements StimulusType
 	 */
 	public function getOptions(): array
 	{
-		return array_filter([
-			$this->capture ? 'capture' : null,
-			$this->once ? 'once' : null,
-			$this->passive === null ? null : ($this->passive ? '' : '!') . 'passive',
-		]);
+		return array_values($this->options);
 	}
 
 }
