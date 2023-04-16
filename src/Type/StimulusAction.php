@@ -31,6 +31,12 @@ final class StimulusAction implements StimulusType
 		return $this->name;
 	}
 
+	public function on(string $event): self
+	{
+		$this->event = $event;
+
+		return $this;
+	}
 	public function event(string $event): self
 	{
 		$this->event = $event;
