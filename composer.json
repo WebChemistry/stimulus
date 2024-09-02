@@ -4,7 +4,7 @@
 		"php": ">=8.0",
 		"nette/php-generator": "^3.5.0 || ^4.0.0",
 		"doctrine/lexer": "^1.2",
-		"nette/finder": "^2.5",
+		"nette/finder": "^2.5 || ^3.0",
 		"utilitte/php": "^1.5",
 		"webchemistry/simple-json": "^1.0",
 		"typertion/php": "^1.0"
